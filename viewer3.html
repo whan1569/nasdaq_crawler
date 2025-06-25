@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NASDAQ 차트 - ApexCharts (with Debug)</title>
+  <style>
+    #chart {
+      max-width: 900px;
+      height: 500px;
+      margin: auto;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+  <div id="chart"></div>
+
+  <script>
+    fetch('nasdaq_index_data/NASDAQ_Composite_1d.csv')
+      .then(response => {
+        if (!response.ok) {
+          console.error("❌ CSV 파일 로딩 실패:", response.status, response.statusText);
+          throw new Error("CSV 파일을 불러올 수 없습니다.");
+        }
+        console.log("✅ CSV 파일 로딩 성공");
+        return response.text();
+      })
+      .then(csvText => {
+        const lines = csvText.split('\n').slice(3);
+        console.log("📦 총 데이터 라인 수:", lines.length);
+
+        const seriesData = lines
+          .map((line, idx) => {
+            line = line.trim();
+            if (!line) return null;
+            const cols = line.split(',');
+
+            if (cols.length < 5) {
+              console.warn(`⚠️ 라인 ${idx + 4} 이상함 →`, line);
+              return null;
+            }
+
+            const rawDate = cols[0];
+            const date = new Date(rawDate);
+
+            const dataPoint = {
+              x: date,
+              y: [
+                parseFloat(cols[4]), // open
+                parseFloat(cols[2]), // high
+                parseFloat(cols[3]), // low
+                parseFloat(cols[1])  // close
+              ]
+            };
+
+            if (isNaN(dataPoint.y[0])) {
+              console.warn(`❓ 숫자 파싱 실패 라인 ${idx + 4} →`, cols);
+              return null;
+            }
+
+            return dataPoint;
+          })
+          .filter(Boolean); // null 제거
+
+        console.log("📊 유효한 데이터 수:", seriesData.length);
+        console.log("🧪 첫 번째 데이터:", seriesData[0]);
+
+        const options = {
+          chart: {
+            type: 'candlestick',
+            height: 500
+          },
+          title: {
+            text: 'NASDAQ Composite',
+            align: 'left'
+          },
+          xaxis: {
+            type: 'datetime'
+          },
+          yaxis: {
+            tooltip: {
+              enabled: true
+            }
+          },
+          series: [{
+            data: seriesData
+          }]
+        };
+
+        const chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+        console.log("✅ 차트 렌더링 완료");
+      })
+      .catch(err => {
+        console.error("🔥 에러 발생:", err);
+      });
+  </script>
+</body>
+</html>

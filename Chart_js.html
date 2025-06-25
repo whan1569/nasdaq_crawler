@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>NASDAQ 차트 - Chart.js 캔들스틱</title>
+  <style>
+    #chartCanvas {
+      width: 900px;
+      height: 500px;
+    }
+  </style>
+
+  <!-- Chart.js core -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- 금융 차트 플러그인 -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial/dist/chartjs-chart-financial.min.js"></script>
+  <!-- 날짜 어댑터 (date-fns) -->
+  <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/dist/date-fns.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <!-- PapaParse (CSV 파싱) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+</head>
+<body>
+  <canvas id="chartCanvas"></canvas>
+
+  <script>
+    const ctx = document.getElementById('chartCanvas').getContext('2d');
+
+    fetch('nasdaq_index_data/NASDAQ_Composite_1d.csv')
+      .then(r => r.text())
+      .then(csvText => {
+        // 헤더 3줄 스킵
+        const allLines = csvText.split('\n').slice(3);
+
+        const data = allLines
+          .map(line => line.trim())
+          .filter(line => line)
+          .map(line => {
+            const cols = line.split(',');
+
+            return {
+              x: new Date(cols[0]),  // Date 객체로 변환 (날짜)
+              o: parseFloat(cols[4]), // open
+              h: parseFloat(cols[2]), // high
+              l: parseFloat(cols[3]), // low
+              c: parseFloat(cols[1])  // close
+            };
+          });
+
+        new Chart(ctx, {
+          type: 'candlestick',
+          data: {
+            datasets: [{
+              label: 'NASDAQ Composite',
+              data: data,
+              borderColor: 'rgba(0, 123, 255, 1)',
+              color: {
+                up: 'rgba(0, 200, 0, 1)',
+                down: 'rgba(255, 0, 0, 1)',
+                unchanged: 'rgba(128, 128, 128, 1)'
+              }
+            }]
+          },
+          options: {
+            responsive: false,
+            scales: {
+              x: {
+                type: 'time',
+                time: {
+                  tooltipFormat: 'yyyy-MM-dd',
+                  unit: 'day',
+                  displayFormats: {
+                    day: 'yyyy-MM-dd'
+                  }
+                }
+              },
+              y: {
+                position: 'right'
+              }
+            }
+          }
+        });
+      })
+      .catch(console.error);
+  </script>
+</body>
+</html>
