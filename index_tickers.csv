@@ -1,0 +1,9 @@
+﻿Ticker,DisplayName,SaveName
+^IXIC,NASDAQ Composite,NASDAQ_Composite
+^NDX,NASDAQ-100,NASDAQ_100
+^GSPC,S&P 500,SP500
+^DJI,Dow Jones 30,Dow_Jones_30
+^RUT,Russell 2000,Russell_2000
+^NYA,NYSE Composite,NYSE_Composite
+^W5000,Wilshire 5000,Wilshire_5000
+^VIX,VIX Volatility,VIX
