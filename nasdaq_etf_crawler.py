@@ -15,7 +15,7 @@ SECTOR_MAP = {
     'XLU': 'Utilities'
 }
 
-def fetch_etf_data(ticker, sector_name, period, interval, save_dir="etf_data"):
+def fetch_etf_data(ticker, sector_name, period, interval, save_dir="nasdaq_etf_data"):
     os.makedirs(save_dir, exist_ok=True)
     try:
         data = yf.download(ticker, period=period, interval=interval, progress=False)
